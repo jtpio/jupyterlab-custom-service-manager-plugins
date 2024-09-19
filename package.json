@@ -90,7 +90,10 @@
     "jupyterlab": {
         "extension": true,
         "outputDir": "myextension/labextension",
-        "disabledExtensions": ["@jupyterlab/application-extension:default-drive"]
+        "disabledExtensions": [
+            "@jupyterlab/application-extension:default-drive",
+            "@jupyterlab/application-extension:contents-manager"
+        ]
     },
     "eslintIgnore": [
         "node_modules",

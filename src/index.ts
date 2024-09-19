@@ -3,7 +3,13 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { Contents, Drive, IDefaultDrive } from '@jupyterlab/services';
+import {
+  Contents,
+  ContentsManager,
+  Drive,
+  IContentsManager,
+  IDefaultDrive
+} from '@jupyterlab/services';
 
 class CustomDrive extends Drive {
   constructor(options: Drive.IOptions) {
@@ -12,11 +18,21 @@ class CustomDrive extends Drive {
   }
 }
 
+class CustomContents extends ContentsManager {
+  async get(
+    path: string,
+    options?: Contents.IFetchOptions
+  ): Promise<Contents.IModel> {
+    console.log('CustomContents.get', path);
+    return super.get(path, options);
+  }
+}
+
 /**
  * Initialization data for the myextension extension.
  */
-const plugin: JupyterFrontEndPlugin<Contents.IDrive> = {
-  id: 'myextension:plugin',
+const defaultDrivePlugin: JupyterFrontEndPlugin<Contents.IDrive> = {
+  id: 'myextension:default-drive',
   description:
     'A JupyterLab extension providing a different custom default drive',
   autoStart: true,
@@ -27,4 +43,15 @@ const plugin: JupyterFrontEndPlugin<Contents.IDrive> = {
   }
 };
 
-export default plugin;
+const contentsPlugin: JupyterFrontEndPlugin<Contents.IManager> = {
+  id: 'myextension:contents-drive',
+  description: 'A JupyterLab extension providing a custom contents manager',
+  autoStart: true,
+  provides: IContentsManager,
+  activate: (app: JupyterFrontEnd): Contents.IManager => {
+    console.log('Using a CUSTOM contents manager plugin');
+    return new CustomContents();
+  }
+};
+
+export default [defaultDrivePlugin, contentsPlugin];
