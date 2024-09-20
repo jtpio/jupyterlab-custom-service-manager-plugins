@@ -52,7 +52,6 @@
         "watch:labextension": "jupyter labextension watch ."
     },
     "dependencies": {
-        "@jupyterlab/application": "^4.0.0",
         "@jupyterlab/services": "file:.yalc/@jupyterlab/services"
     },
     "devDependencies": {
