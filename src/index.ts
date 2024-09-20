@@ -1,9 +1,18 @@
 import {
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
+} from '@jupyterlab/application';
+
+import {
   Contents,
   ContentsManager,
   Drive,
   IContentsManager,
   IDefaultDrive,
+  IKernelManager,
+  IKernelSpecManager,
+  Kernel,
+  KernelSpec,
   ServiceManagerPlugin
 } from '@jupyterlab/services';
 
@@ -24,9 +33,6 @@ class CustomContents extends ContentsManager {
   }
 }
 
-/**
- * Initialization data for the myextension extension.
- */
 const defaultDrivePlugin: ServiceManagerPlugin<Contents.IDrive> = {
   id: 'myextension:default-drive',
   description:
@@ -50,4 +56,51 @@ const contentsPlugin: ServiceManagerPlugin<Contents.IManager> = {
   }
 };
 
-export default [defaultDrivePlugin, contentsPlugin];
+/**
+ * Example consuming a required service
+ */
+const kernelsConsumerPlugin: ServiceManagerPlugin<void> = {
+  id: 'myextension:kernels-consumer',
+  description: 'A JupyterLab extension consuming the kernels service',
+  autoStart: true,
+  requires: [IKernelManager],
+  activate: (_: null, kernels: Kernel.IManager): void => {
+    kernels.runningChanged.connect((_, running) => {
+      console.log('Running kernels:', running);
+    });
+  }
+};
+
+/**
+ * Example consuming an optional service
+ */
+const kernelSpecConsumerPlugin: ServiceManagerPlugin<void> = {
+  id: 'myextension:kernelspec-consumer',
+  description: 'A JupyterLab extension consuming the kernel spec service',
+  autoStart: true,
+  optional: [IKernelSpecManager],
+  activate: (_: null, kernelSpecs: KernelSpec.IManager | null): void => {
+    if (kernelSpecs) {
+      console.log('Available kernel specs:', kernelSpecs.specs);
+      kernelSpecs.specsChanged.connect(() => {
+        console.log('Available kernel specs:', kernelSpecs.specs);
+      });
+    }
+  }
+};
+
+const examplePlugin: JupyterFrontEndPlugin<void> = {
+  id: 'myextension:example',
+  autoStart: true,
+  activate: (app: JupyterFrontEnd): void => {
+    console.log('Example of a regular JupyterLab extension is activated!');
+  }
+};
+
+export default [
+  defaultDrivePlugin,
+  contentsPlugin,
+  kernelsConsumerPlugin,
+  kernelSpecConsumerPlugin,
+  examplePlugin
+];
